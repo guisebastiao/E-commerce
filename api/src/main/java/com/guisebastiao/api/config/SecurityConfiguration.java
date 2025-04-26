@@ -1,10 +1,14 @@
 package com.guisebastiao.api.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guisebastiao.api.dtos.DefaultResponseDTO;
 import com.guisebastiao.api.security.SecurityFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,26 +43,26 @@ public class SecurityConfiguration {
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(((request, response, authException) -> {
-//                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//                            response.setContentType("application/json");
-//
-//                            ResponseEntityDTO responseDTO = new ResponseEntityDTO();
-//                            responseDTO.setStatus(HttpStatus.UNAUTHORIZED.value());
-//                            responseDTO.setMessage("Please login again");
-//                            responseDTO.setSuccess(Boolean.FALSE);
-//
-//                            new ObjectMapper().writeValue(response.getOutputStream(), responseDTO);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+
+                            DefaultResponseDTO responseDTO = new DefaultResponseDTO();
+                            responseDTO.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            responseDTO.setMessage("Por favor, faça o login novamente");
+                            responseDTO.setSuccess(Boolean.FALSE);
+
+                            new ObjectMapper().writeValue(response.getOutputStream(), responseDTO);
                         }))
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-//                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//                            response.setContentType("application/json");
-//
-//                            ResponseEntityDTO responseDTO = new ResponseEntityDTO();
-//                            responseDTO.setStatus(HttpStatus.FORBIDDEN.value());
-//                            responseDTO.setMessage("You don't have permission to access this resource");
-//                            responseDTO.setSuccess(Boolean.FALSE);
-//
-//                            new ObjectMapper().writeValue(response.getOutputStream(), responseDTO);
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+
+                            DefaultResponseDTO responseDTO = new DefaultResponseDTO();
+                            responseDTO.setStatus(HttpStatus.FORBIDDEN.value());
+                            responseDTO.setMessage("Você não tem permissão para acessar esse recurso");
+                            responseDTO.setSuccess(Boolean.FALSE);
+
+                            new ObjectMapper().writeValue(response.getOutputStream(), responseDTO);
                         })
                 )
                 .build();
