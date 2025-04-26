@@ -29,7 +29,7 @@ public class RegisterDTO {
     })
     private String password;
 
-    @NotBlank(message = "Informe seu e-mail")
+    @NotBlank(message = "Informe seu número de telefone")
     @Size(max = 13, message = "O seu número de telefone tem que ser menor de 13 caracteres")
     private String phone;
 
