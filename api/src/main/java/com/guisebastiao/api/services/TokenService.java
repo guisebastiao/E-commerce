@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.guisebastiao.api.dtos.AuthResponseDTO;
 import com.guisebastiao.api.models.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,15 +25,22 @@ public class TokenService {
     @Value("${session.expiration.time}")
     private String durationToken;
 
-    public String generateToken(User user) {
+    public AuthResponseDTO generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(this.secretToken);
 
-            return JWT.create()
+            Instant expires = this.generateExpirationDate();
+
+            String token = JWT.create()
                     .withIssuer("e-commerce")
                     .withSubject(user.getId().toString())
-                    .withExpiresAt(this.generateExpirationDate())
+                    .withExpiresAt(expires)
                     .sign(algorithm);
+            AuthResponseDTO authResponseDTO = new AuthResponseDTO();
+            authResponseDTO.setToken(token);
+            authResponseDTO.setExpires(expires);
+
+            return authResponseDTO;
         } catch (JWTCreationException exception) {
             throw new JWTCreationException("JWT generation failed", exception);
         }
@@ -51,6 +60,14 @@ public class TokenService {
         }
     }
 
+    public String getSubjectFromTokenEvenIfExpired(String token) {
+        try {
+            DecodedJWT decodedJWT = JWT.decode(token);
+            return decodedJWT.getSubject();
+        } catch (JWTVerificationException e) {
+            return null;
+        }
+    }
 
     private Instant generateExpirationDate() {
         int jwtDuration = Integer.parseInt(this.durationToken);
