@@ -16,5 +16,9 @@ public enum Category {
     GAMES,
     MUSIC,
     HEALTH,
-    DRINKS
+    DRINKS;
+
+    public static Category fromString(String value) {
+        return Category.valueOf(value.toUpperCase());
+    }
 }

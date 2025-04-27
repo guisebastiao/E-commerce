@@ -2,10 +2,7 @@ package com.guisebastiao.api.controllers;
 
 import com.guisebastiao.api.dtos.DefaultResponseDTO;
 import com.guisebastiao.api.dtos.FieldErrorDTO;
-import com.guisebastiao.api.exceptions.BadRequestException;
-import com.guisebastiao.api.exceptions.DuplicateEntityException;
-import com.guisebastiao.api.exceptions.EntityNotFoundException;
-import com.guisebastiao.api.exceptions.RequiredAuthenticationException;
+import com.guisebastiao.api.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -81,6 +78,17 @@ public class ResourceExceptionHandler {
         response.setSuccess(Boolean.FALSE);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<DefaultResponseDTO> handleForbiddenException(ForbiddenException e) {
+        DefaultResponseDTO response = new DefaultResponseDTO();
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setMessage(e.getMessage());
+        response.setSuccess(Boolean.FALSE);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

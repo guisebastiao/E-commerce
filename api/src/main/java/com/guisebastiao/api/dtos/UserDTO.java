@@ -11,6 +11,7 @@ public class UserDTO {
     private String name;
     private String email;
     private String phone;
+    private int reputation;
     private Role role;
 
     public UserDTO toDto(User user) {
@@ -18,6 +19,7 @@ public class UserDTO {
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
+        dto.setReputation(user.getReputation());
         dto.setRole(user.getRole());
         return dto;
     }

@@ -4,5 +4,9 @@ public enum StatusOrder {
     Pending,
     Paid,
     Sent,
-    Canceled
+    Canceled;
+
+    public static StatusOrder fromString(String value) {
+        return StatusOrder.valueOf(value.toUpperCase());
+    }
 }

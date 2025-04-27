@@ -1,5 +1,8 @@
 package com.guisebastiao.api.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.guisebastiao.api.dtos.UserDTO;
 import com.guisebastiao.api.enums.Category;
 import com.guisebastiao.api.enums.ProductActive;
 import jakarta.persistence.*;
@@ -42,6 +45,10 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(name = "is_active")
     private ProductActive isActive;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "saller", nullable = false)
+    private User saller;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CartItem> cartItems;

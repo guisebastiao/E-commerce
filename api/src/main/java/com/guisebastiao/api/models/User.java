@@ -1,5 +1,7 @@
 package com.guisebastiao.api.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.guisebastiao.api.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -35,12 +37,15 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
-    @Column(name = "reputation", nullable = false, columnDefinition = "INT DEFAULT 5")
+    @Column(name = "reputation", nullable = false)
     private int reputation;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+
+    @OneToMany(mappedBy = "saller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Product> products = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses = new ArrayList<>();
