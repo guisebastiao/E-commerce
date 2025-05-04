@@ -26,4 +26,10 @@ public class CartController {
         DefaultResponseDTO response = this.cartService.getAllCartItems(offset, limit);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<DefaultResponseDTO> getCartItem(@PathVariable String id) {
+        DefaultResponseDTO response = this.cartService.deleteCartItem(id);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }

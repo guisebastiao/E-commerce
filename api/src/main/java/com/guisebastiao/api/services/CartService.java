@@ -1,6 +1,7 @@
 package com.guisebastiao.api.services;
 
 import com.guisebastiao.api.dtos.*;
+import com.guisebastiao.api.exceptions.BadRequestException;
 import com.guisebastiao.api.exceptions.EntityNotFoundException;
 import com.guisebastiao.api.models.Cart;
 import com.guisebastiao.api.models.CartItem;
@@ -47,6 +48,10 @@ public class CartService {
         Product product = productRepository.findById(UUIDConverter.toUUID(dto.getProductId()))
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
 
+        if(product.getStock() < dto.getQuantity()) {
+            throw new BadRequestException("A quantidade selecionada está fora de estoque");
+        }
+
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(product.getId()))
                 .findFirst()
@@ -74,8 +79,6 @@ public class CartService {
     public DefaultResponseDTO getAllCartItems(int offset, int limit) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        System.out.println("offset: " + offset + "limit: " + limit);
-
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
             Cart newCart = new Cart();
             newCart.setUser(user);
@@ -87,6 +90,9 @@ public class CartService {
         Page<CartItem> cartItemsPage = cartItemRepository.findByCart(cart, pageable);
 
         List<CartResponseDTO> products = cartItemsPage.getContent().stream().map(item -> {
+
+            UserDTO userDTO = new UserDTO();
+
             ProductResponseDTO product = new ProductResponseDTO();
             product.setId(item.getProduct().getId());
             product.setProductName(item.getProduct().getProductName());
@@ -96,13 +102,17 @@ public class CartService {
             product.setCategory(item.getProduct().getCategory());
             product.setDiscount(item.getProduct().getDiscount());
             product.setIsActive(item.getProduct().getIsActive());
+            product.setSaller(userDTO.toDto(item.getProduct().getSaller()));
 
             CartResponseDTO response = new CartResponseDTO();
             response.setCartItemid(item.getId());
             response.setProduct(product);
+            response.setQuantity(item.getQuantity());
 
             return response;
         }).toList();
+
+
 
         PagingDTO pagingDTO = new PagingDTO();
         pagingDTO.setCurrentPage(offset);
@@ -116,6 +126,20 @@ public class CartService {
         response.setPaging(pagingDTO);
         response.setSuccess(Boolean.TRUE);
 
+        return response;
+    }
+
+    @Transactional
+    public DefaultResponseDTO deleteCartItem(String id) {
+        CartItem cartItem = this.cartItemRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("Esse produto não foi encontrado"));
+
+        cartItemRepository.delete(cartItem);
+
+        DefaultResponseDTO response = new DefaultResponseDTO();
+        response.setStatus(HttpStatus.OK.value());
+        response.setMessage("Produto removido do carrinho com sucesso");
+        response.setSuccess(Boolean.TRUE);
         return response;
     }
 }
