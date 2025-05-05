@@ -30,19 +30,16 @@ public class AuthService {
     private TokenService tokenService;
 
     public DefaultResponseDTO login(LoginDTO dto) {
-        Optional<User> user = userRepository.findByEmail(dto.getEmail());
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("Credenciais incorretas"));
 
-        if(user.isEmpty()) {
-            throw new EntityNotFoundException("Credenciais incorretas");
-        }
-
-        if(!passwordEncoder.matches(dto.getPassword(), user.get().getPassword())) {
+        if(!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new RequiredAuthenticationException("Credenciais incorretas");
         }
 
-        AuthResponseDTO authResponse = tokenService.generateToken(user.get());
+        AuthResponseDTO authResponse = tokenService.generateToken(user);
         UserDTO userDTO = new UserDTO();
-        authResponse.setUser(userDTO.toDto(user.get()));
+        authResponse.setUser(userDTO.toDto(user));
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
@@ -56,7 +53,7 @@ public class AuthService {
         Optional<User> existUser = userRepository.findByEmail(dto.getEmail());
 
         if(existUser.isPresent()) {
-            throw new DuplicateEntityException("Essa conta já está cadastrada");
+            throw new DuplicateEntityException("Essa conta já esta cadastrada");
         }
 
         User user = new User();
@@ -89,15 +86,12 @@ public class AuthService {
             throw new RequiredAuthenticationException("Por favor faça o login novamente");
         }
 
-        Optional<User> user = this.userRepository.findById(UUID.fromString(login));
+        User user = this.userRepository.findById(UUID.fromString(login))
+                .orElseThrow(() -> new RequiredAuthenticationException("Por favor faça o login novamente"));
 
-        if (user.isEmpty()) {
-            throw new RequiredAuthenticationException("Por favor faça o login novamente");
-        }
-
-        AuthResponseDTO authResponse = tokenService.generateToken(user.get());
+        AuthResponseDTO authResponse = tokenService.generateToken(user);
         UserDTO userDTO = new UserDTO();
-        authResponse.setUser(userDTO.toDto(user.get()));
+        authResponse.setUser(userDTO.toDto(user));
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());

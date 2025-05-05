@@ -65,13 +65,10 @@ public class ProfilePictureService {
     }
 
     public DefaultResponseDTO getProfilePicture(String userId) throws Exception {
-        Optional<User> existUser = this.userRepository.findById(UUIDConverter.toUUID(userId));
+        User user = this.userRepository.findById(UUIDConverter.toUUID(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Imagem de perfil não disponivel"));
 
-        if(existUser.isEmpty()) {
-            throw new EntityNotFoundException("Imagem de perfil não disponivel");
-        }
-
-        var objectId = existUser.get().getProfilePicture().getObjectId();
+        var objectId = user.getProfilePicture().getObjectId();
 
         String url = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket("ecommerce").object(objectId).expiry(604800).build());
 

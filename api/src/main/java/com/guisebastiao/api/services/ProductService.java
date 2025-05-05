@@ -9,6 +9,7 @@ import com.guisebastiao.api.enums.ProductActive;
 import com.guisebastiao.api.enums.Role;
 import com.guisebastiao.api.exceptions.EntityNotFoundException;
 import com.guisebastiao.api.exceptions.ForbiddenException;
+import com.guisebastiao.api.exceptions.UnauthorizedException;
 import com.guisebastiao.api.models.Product;
 import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.ProductRepository;
@@ -56,18 +57,15 @@ public class ProductService {
     }
 
     public DefaultResponseDTO findById(String id) {
-        Optional<Product> product = productRepository.findById(UUIDConverter.toUUID(id));
-
-        if (product.isEmpty()) {
-            throw new EntityNotFoundException("O produto não está disponivel");
-        }
+        Product product = productRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("O produto não está disponivel"));
 
         ProductResponseDTO productResponseDTO = new ProductResponseDTO();
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Produto encontrado com sucesso");
-        response.setData(productResponseDTO.toDto(product.get()));
+        response.setData(productResponseDTO.toDto(product));
         response.setSuccess(Boolean.TRUE);
 
         return response;
@@ -77,10 +75,11 @@ public class ProductService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
-        Optional<Product> product = this.productRepository.findById(UUIDConverter.toUUID(id));
+        Product product = this.productRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("Esse produto não existe"));
 
-        if(product.isEmpty()) {
-            throw new EntityNotFoundException("Esse produto não existe");
+        if(!user.getId().toString().equals(product.getSaller().getId().toString())) {
+            throw new UnauthorizedException("Você não tem permissão para acessar este produto");
         }
 
         if(!Role.SELLER.equals(user.getRole())) {
@@ -112,17 +111,18 @@ public class ProductService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
-        Optional<Product> product = this.productRepository.findById(UUIDConverter.toUUID(id));
+        Product product = this.productRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("Esse produto não existe"));
 
-        if(product.isEmpty()) {
-            throw new EntityNotFoundException("Esse produto não existe");
+        if(!user.getId().toString().equals(product.getSaller().getId().toString())) {
+            throw new UnauthorizedException("Você não tem permissão para acessar este produto");
         }
 
         if(!Role.SELLER.equals(user.getRole())) {
             throw new ForbiddenException("Você não tem permissão para deletar esse produto");
         }
 
-        this.productRepository.delete(product.get());
+        this.productRepository.delete(product);
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());

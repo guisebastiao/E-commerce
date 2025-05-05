@@ -1,5 +1,6 @@
 package com.guisebastiao.api.models;
 
+import com.guisebastiao.api.enums.State;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,15 +21,16 @@ public class Address {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "street", nullable = false)
+    @Column(name = "street", nullable = false, length = 255)
     private String street;
 
-    @Column(name = "city", nullable = false)
+    @Column(name = "city", nullable = false, length = 255)
     private String city;
 
-    @Column(name = "state", nullable = false)
-    private String state;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state", nullable = false, length = 2)
+    private State state;
 
-    @Column(name = "zip_code", nullable = false)
+    @Column(name = "zip_code", nullable = false, length = 8)
     private String zip;
 }

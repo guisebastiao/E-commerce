@@ -2,17 +2,11 @@ package com.guisebastiao.api.controllers;
 
 import com.guisebastiao.api.dtos.DefaultResponseDTO;
 import com.guisebastiao.api.services.ProfilePictureService;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/profile-picture")

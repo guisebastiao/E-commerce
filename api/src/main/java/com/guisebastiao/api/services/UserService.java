@@ -3,7 +3,6 @@ package com.guisebastiao.api.services;
 import com.guisebastiao.api.dtos.DefaultResponseDTO;
 import com.guisebastiao.api.dtos.UserDTO;
 import com.guisebastiao.api.dtos.UserUpdateDTO;
-import com.guisebastiao.api.exceptions.BadRequestException;
 import com.guisebastiao.api.exceptions.EntityNotFoundException;
 import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.UserRepository;
@@ -13,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
-
 @Service
 @NoArgsConstructor
 public class UserService {
@@ -24,41 +20,33 @@ public class UserService {
     private UserRepository userRepository;
 
     public DefaultResponseDTO getUserById(String id) {
-        UUID userId = UUIDConverter.toUUID(id);
-        Optional<User> user = this.userRepository.findById(userId);
-
-        if(user.isEmpty()) {
-            throw new EntityNotFoundException("Essa conta não foi encontrado");
-        }
+        User user = this.userRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("Essa conta não foi encontrado"));
 
         UserDTO userDTO = new UserDTO();
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Conta encontrada com sucesso");
-        response.setData(userDTO.toDto(user.get()));
+        response.setData(userDTO.toDto(user));
         response.setSuccess(Boolean.TRUE);
 
         return response;
     }
 
     public DefaultResponseDTO update(String id, UserUpdateDTO dto) {
-        UUID userId = UUIDConverter.toUUID(id);
-        Optional<User> userExist = this.userRepository.findById(userId);
+        User user = this.userRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("Essa conta não foi encontrado"));
 
-        if(userExist.isEmpty()) {
-            throw new EntityNotFoundException("Essa conta não foi encontrado");
-        }
+        User newUser = new User();
+        newUser.setId(user.getId());
+        newUser.setEmail(user.getEmail());
+        newUser.setPhone(dto.getPhone());
+        newUser.setName(dto.getName());
+        newUser.setPassword(user.getPassword());
+        newUser.setRole(user.getRole());
 
-        User user = new User();
-        user.setId(userExist.get().getId());
-        user.setEmail(userExist.get().getEmail());
-        user.setPhone(dto.getPhone());
-        user.setName(dto.getName());
-        user.setPassword(userExist.get().getPassword());
-        user.setRole(userExist.get().getRole());
-
-        this.userRepository.save(user);
+        this.userRepository.save(newUser);
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
@@ -69,14 +57,10 @@ public class UserService {
     }
 
     public DefaultResponseDTO delete(String id) {
-        UUID userId = UUIDConverter.toUUID(id);
-        Optional<User> user = this.userRepository.findById(userId);
+        User user = this.userRepository.findById(UUIDConverter.toUUID(id))
+                .orElseThrow(() -> new EntityNotFoundException("Essa conta não foi encontrado"));
 
-        if(user.isEmpty()) {
-            throw new EntityNotFoundException("Essa conta não foi encontrado");
-        }
-
-        this.userRepository.delete(user.get());
+        this.userRepository.delete(user);
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());

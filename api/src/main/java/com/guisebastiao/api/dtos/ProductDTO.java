@@ -3,8 +3,6 @@ package com.guisebastiao.api.dtos;
 import com.guisebastiao.api.enums.Category;
 import com.guisebastiao.api.enums.ProductActive;
 import com.guisebastiao.api.enums.ValidateEnum;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;

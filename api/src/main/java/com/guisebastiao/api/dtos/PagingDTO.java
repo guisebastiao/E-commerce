@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PagingDTO {
-    private int totalItems;
+    private long totalItems;
     private int totalPages;
     private int currentPage;
     private int itemsPerPage;

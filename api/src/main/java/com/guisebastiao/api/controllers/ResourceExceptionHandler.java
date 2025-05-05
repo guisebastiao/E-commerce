@@ -79,6 +79,16 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<DefaultResponseDTO> handleUnauthorizedException(UnauthorizedException e) {
+        DefaultResponseDTO response = new DefaultResponseDTO();
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setMessage(e.getMessage());
+        response.setSuccess(Boolean.FALSE);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<DefaultResponseDTO> handleForbiddenException(ForbiddenException e) {
