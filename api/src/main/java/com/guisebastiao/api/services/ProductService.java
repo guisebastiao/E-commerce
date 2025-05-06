@@ -29,8 +29,7 @@ public class ProductService {
     private ProductRepository productRepository;
 
     public DefaultResponseDTO create(ProductDTO dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if(!user.getRole().equals(Role.SELLER)) {
             throw new ForbiddenException("Sua conta não está autorizada para vender produtos");
@@ -72,13 +71,12 @@ public class ProductService {
     }
 
     public DefaultResponseDTO update(String id, ProductDTO dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Product product = this.productRepository.findById(UUIDConverter.toUUID(id))
                 .orElseThrow(() -> new EntityNotFoundException("Esse produto não existe"));
 
-        if(!user.getId().toString().equals(product.getSaller().getId().toString())) {
+        if(!user.getId().equals(product.getSaller().getId())) {
             throw new UnauthorizedException("Você não tem permissão para acessar este produto");
         }
 
@@ -108,13 +106,12 @@ public class ProductService {
     }
 
     public DefaultResponseDTO delete(String id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Product product = this.productRepository.findById(UUIDConverter.toUUID(id))
                 .orElseThrow(() -> new EntityNotFoundException("Esse produto não existe"));
 
-        if(!user.getId().toString().equals(product.getSaller().getId().toString())) {
+        if(!user.getId().equals(product.getSaller().getId())) {
             throw new UnauthorizedException("Você não tem permissão para acessar este produto");
         }
 

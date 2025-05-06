@@ -17,16 +17,13 @@ public class AddressResponseDTO {
     private State state;
     private String zip;
 
-    public List<AddressResponseDTO> toDto(List<Address> addresses) {
+    public AddressResponseDTO toDto(Address address) {
         AddressResponseDTO dto = new AddressResponseDTO();
-
-        return (List<AddressResponseDTO>) addresses.stream().map(e -> {
-            dto.setId(e.getId());
-            dto.setStreet(e.getStreet());
-            dto.setCity(e.getCity());
-            dto.setState(e.getState());
-            dto.setZip(e.getZip());
-            return dto;
-        });
+        dto.setId(address.getId());
+        dto.setStreet(address.getStreet());
+        dto.setCity(address.getCity());
+        dto.setState(address.getState());
+        dto.setZip(address.getZip());
+        return dto;
     }
 }

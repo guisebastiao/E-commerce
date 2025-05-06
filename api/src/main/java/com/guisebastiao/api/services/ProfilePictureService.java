@@ -36,8 +36,7 @@ public class ProfilePictureService {
     private UserRepository userRepository;
 
     public DefaultResponseDTO uploadProfilePicture(MultipartFile file) throws Exception {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Optional<ProfilePicture> existProfilePicture = profilePictureRepository.findByUser(user);
 

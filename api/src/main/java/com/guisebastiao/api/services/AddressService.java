@@ -29,8 +29,7 @@ public class AddressService {
     private AddressRepository addressRepository;
 
     public DefaultResponseDTO create(AddressDTO dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Address address = new Address();
         address.setStreet(dto.getStreet());
@@ -50,8 +49,7 @@ public class AddressService {
     }
 
     public DefaultResponseDTO findAllAddressByUser(int offset, int limit) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Pageable pageable = PageRequest.of(offset, limit);
 
@@ -66,15 +64,7 @@ public class AddressService {
         List<AddressResponseDTO> responseList = resultPage
                 .getContent()
                 .stream()
-                .map(e -> {
-                    AddressResponseDTO response = new AddressResponseDTO();
-                    response.setId(e.getId());
-                    response.setStreet(e.getStreet());
-                    response.setCity(e.getCity());
-                    response.setState(e.getState());
-                    response.setZip(e.getZip());
-                    return response;
-                })
+                .map(e -> new AddressResponseDTO().toDto(e))
                 .toList();
 
         DefaultResponseDTO response = new DefaultResponseDTO();
@@ -87,13 +77,12 @@ public class AddressService {
     }
 
     public DefaultResponseDTO update(String id, AddressDTO dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Address address = this.addressRepository.findById(UUIDConverter.toUUID(id))
                 .orElseThrow(() -> new EntityNotFoundException("Esse endereço não existe"));
 
-        if(!user.getId().toString().equals(address.getUser().getId().toString())) {
+        if(!user.getId().equals(address.getUser().getId())) {
             throw new UnauthorizedException("Você não tem permissão para acessar este endereço");
         }
 
@@ -115,13 +104,12 @@ public class AddressService {
     }
 
     public DefaultResponseDTO delete(String id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Address address = this.addressRepository.findById(UUIDConverter.toUUID(id))
                 .orElseThrow(() -> new EntityNotFoundException("Esse endereço não existe"));
 
-        if(!user.getId().toString().equals(address.getUser().getId().toString())) {
+        if(!user.getId().equals(address.getUser().getId())) {
             throw new UnauthorizedException("Você não tem permissão para acessar este endereço");
         }
 
