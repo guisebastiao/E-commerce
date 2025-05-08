@@ -1,6 +1,7 @@
 package com.guisebastiao.api.dtos;
 
 import com.guisebastiao.api.models.Favorite;
+import io.minio.MinioClient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,11 +13,11 @@ public class FavoriteResponseDTO {
     private UUID id;
     private ProductResponseDTO product;
 
-    public FavoriteResponseDTO toDto(Favorite favorite) {
+    public FavoriteResponseDTO toDto(Favorite favorite, MinioClient minioClient) {
         FavoriteResponseDTO dto = new FavoriteResponseDTO();
         ProductResponseDTO productDto = new ProductResponseDTO();
         dto.setId(favorite.getId());
-        dto.setProduct(productDto.toDto(favorite.getProduct()));
+        dto.setProduct(productDto.toDto(favorite.getProduct(), minioClient));
         return dto;
     }
 }

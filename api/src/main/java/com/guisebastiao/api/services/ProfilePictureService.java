@@ -2,6 +2,7 @@ package com.guisebastiao.api.services;
 
 import com.guisebastiao.api.dtos.DefaultResponseDTO;
 import com.guisebastiao.api.dtos.ProfilePictureDTO;
+import com.guisebastiao.api.exceptions.BadRequestException;
 import com.guisebastiao.api.exceptions.EntityNotFoundException;
 import com.guisebastiao.api.models.ProfilePicture;
 import com.guisebastiao.api.models.User;
@@ -11,17 +12,19 @@ import com.guisebastiao.api.utils.UUIDConverter;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.DataFormatException;
 
 @Service
 public class ProfilePictureService {
@@ -35,13 +38,21 @@ public class ProfilePictureService {
     @Autowired
     private UserRepository userRepository;
 
+    @Transactional
     public DefaultResponseDTO uploadProfilePicture(MultipartFile file) throws Exception {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Optional<ProfilePicture> existProfilePicture = profilePictureRepository.findByUser(user);
+        Optional<ProfilePicture> existingPicture = this.profilePictureRepository.findByUser(user);
 
-        if(existProfilePicture.isPresent()) {
-            this.profilePictureRepository.delete(existProfilePicture.get());
+        if (existingPicture.isPresent()) {
+            ProfilePicture profilePicture = existingPicture.get();
+
+            this.minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket("ecommerce")
+                    .object(profilePicture.getObjectId())
+                    .build());
+
+            this.profilePictureRepository.deleteByUser(user);
         }
 
         InputStream inputStream = file.getInputStream();
@@ -53,7 +64,7 @@ public class ProfilePictureService {
         profilePicture.setObjectId(objectId);
         profilePicture.setUser(user);
 
-        profilePictureRepository.save(profilePicture);
+        this.profilePictureRepository.save(profilePicture);
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
@@ -67,6 +78,10 @@ public class ProfilePictureService {
         User user = this.userRepository.findById(UUIDConverter.toUUID(userId))
                 .orElseThrow(() -> new EntityNotFoundException("Imagem de perfil não disponivel"));
 
+        if(user.getProfilePicture() == null) {
+            throw new EntityNotFoundException("A foto de perfil não foi encontrada");
+        }
+
         var objectId = user.getProfilePicture().getObjectId();
 
         String url = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket("ecommerce").object(objectId).expiry(604800).build());
@@ -76,10 +91,32 @@ public class ProfilePictureService {
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
-        response.setData(profilePictureDTO);
         response.setMessage("Imagem de perfil encontrado com sucesso");
+        response.setData(profilePictureDTO);
         response.setSuccess(Boolean.TRUE);
 
+        return response;
+    }
+
+    @Transactional
+    public DefaultResponseDTO deleteProfilePicture() throws Exception {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        ProfilePicture profilePicture = this.profilePictureRepository.findByUser(user)
+                .orElseThrow(() -> new EntityNotFoundException("Foto de perfil não foi encontrada"));
+
+        this.minioClient.removeObject(RemoveObjectArgs.builder()
+                .bucket("ecommerce")
+                .object(profilePicture.getObjectId())
+                .build());
+
+
+        this.profilePictureRepository.deleteByUser(user);
+
+        DefaultResponseDTO response = new DefaultResponseDTO();
+        response.setStatus(HttpStatus.OK.value());
+        response.setMessage("Sua imagem de perfil foi deletada com sucesso");
+        response.setSuccess(Boolean.TRUE);
         return response;
     }
 }

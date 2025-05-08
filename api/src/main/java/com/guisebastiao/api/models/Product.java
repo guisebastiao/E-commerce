@@ -1,8 +1,5 @@
 package com.guisebastiao.api.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.guisebastiao.api.dtos.UserDTO;
 import com.guisebastiao.api.enums.Category;
 import com.guisebastiao.api.enums.ProductActive;
 import jakarta.persistence.*;

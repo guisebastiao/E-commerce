@@ -7,6 +7,7 @@ import com.guisebastiao.api.exceptions.EntityNotFoundException;
 import com.guisebastiao.api.exceptions.RequiredAuthenticationException;
 import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.UserRepository;
+import io.minio.MinioClient;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,9 @@ public class AuthService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private MinioClient minioClient;
+
     public DefaultResponseDTO login(LoginDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Credenciais incorretas"));
@@ -38,8 +42,8 @@ public class AuthService {
         }
 
         AuthResponseDTO authResponse = tokenService.generateToken(user);
-        UserDTO userDTO = new UserDTO();
-        authResponse.setUser(userDTO.toDto(user));
+        UserResponseDTO userDTO = new UserResponseDTO();
+        authResponse.setUser(userDTO.toDto(user, minioClient));
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
@@ -67,8 +71,8 @@ public class AuthService {
         this.userRepository.save(user);
 
         AuthResponseDTO authResponse = tokenService.generateToken(user);
-        UserDTO userDTO = new UserDTO();
-        authResponse.setUser(userDTO.toDto(user));
+        UserResponseDTO userDTO = new UserResponseDTO();
+        authResponse.setUser(userDTO.toDto(user, minioClient));
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.CREATED.value());
@@ -90,8 +94,8 @@ public class AuthService {
                 .orElseThrow(() -> new RequiredAuthenticationException("Por favor faça o login novamente"));
 
         AuthResponseDTO authResponse = tokenService.generateToken(user);
-        UserDTO userDTO = new UserDTO();
-        authResponse.setUser(userDTO.toDto(user));
+        UserResponseDTO userDTO = new UserResponseDTO();
+        authResponse.setUser(userDTO.toDto(user, minioClient));
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());

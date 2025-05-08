@@ -3,6 +3,7 @@ package com.guisebastiao.api.dtos;
 import com.guisebastiao.api.enums.Category;
 import com.guisebastiao.api.enums.ProductActive;
 import com.guisebastiao.api.models.Product;
+import io.minio.MinioClient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,16 +21,12 @@ public class ProductResponseDTO {
     private Category category;
     private int discount;
     private ProductActive isActive;
-    private UserDTO saller;
+    private UserResponseDTO saller;
 
-    public ProductResponseDTO toDto(Product product) {
+    public ProductResponseDTO toDto(Product product, MinioClient minioClient) {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO();
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setName(product.getSaller().getName());
-        userDTO.setEmail(product.getSaller().getEmail());
-        userDTO.setPhone(product.getSaller().getPhone());
-        userDTO.setRole(product.getSaller().getRole());
+        UserResponseDTO userDTO = new UserResponseDTO();
 
         productResponseDTO.setId(product.getId());
         productResponseDTO.setProductName(product.getProductName());
@@ -39,7 +36,7 @@ public class ProductResponseDTO {
         productResponseDTO.setCategory(product.getCategory());
         productResponseDTO.setDiscount(product.getDiscount());
         productResponseDTO.setIsActive(product.getIsActive());
-        productResponseDTO.setSaller(userDTO);
+        productResponseDTO.setSaller(userDTO.toDto(product.getSaller(), minioClient));
 
         return productResponseDTO;
     }

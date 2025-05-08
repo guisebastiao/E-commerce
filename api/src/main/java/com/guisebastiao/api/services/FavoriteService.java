@@ -12,6 +12,7 @@ import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.FavoriteRepository;
 import com.guisebastiao.api.repositories.ProductRepository;
 import com.guisebastiao.api.utils.UUIDConverter;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,9 @@ public class FavoriteService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private MinioClient minioClient;
 
     public DefaultResponseDTO create(String productId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -67,7 +71,7 @@ public class FavoriteService {
         List<FavoriteResponseDTO> responseList = resultPage
                 .getContent()
                 .stream()
-                .map(e -> new FavoriteResponseDTO().toDto(e))
+                .map(e -> new FavoriteResponseDTO().toDto(e, minioClient))
                 .toList();
 
         DefaultResponseDTO response = new DefaultResponseDTO();

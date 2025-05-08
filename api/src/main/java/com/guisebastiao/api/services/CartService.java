@@ -11,6 +11,7 @@ import com.guisebastiao.api.repositories.CartItemRepository;
 import com.guisebastiao.api.repositories.CartRepository;
 import com.guisebastiao.api.repositories.ProductRepository;
 import com.guisebastiao.api.utils.UUIDConverter;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,9 @@ public class CartService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private MinioClient minioClient;
 
     @Transactional
     public DefaultResponseDTO create(AddCartItemDTO dto) {
@@ -91,7 +95,7 @@ public class CartService {
 
         List<CartResponseDTO> products = cartItemsPage.getContent().stream().map(item -> {
 
-            UserDTO userDTO = new UserDTO();
+            UserResponseDTO userDTO = new UserResponseDTO();
 
             ProductResponseDTO product = new ProductResponseDTO();
             product.setId(item.getProduct().getId());
@@ -102,7 +106,7 @@ public class CartService {
             product.setCategory(item.getProduct().getCategory());
             product.setDiscount(item.getProduct().getDiscount());
             product.setIsActive(item.getProduct().getIsActive());
-            product.setSaller(userDTO.toDto(item.getProduct().getSaller()));
+            product.setSaller(userDTO.toDto(item.getProduct().getSaller(), minioClient));
 
             CartResponseDTO response = new CartResponseDTO();
             response.setCartItemid(item.getId());

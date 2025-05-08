@@ -3,6 +3,7 @@ package com.guisebastiao.api.security;
 import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.UserRepository;
 import com.guisebastiao.api.services.TokenService;
+import com.guisebastiao.api.utils.UUIDConverter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,9 +35,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         String login = this.tokenService.validateToken(token);
 
         if (login != null) {
-            UUID uuid = UUID.fromString(login);
-
-            Optional<User> user = this.userRepository.findById(uuid);
+            Optional<User> user = this.userRepository.findById(UUIDConverter.toUUID(login));
 
             if (user.isEmpty()) {
                 chain.doFilter(request, response);

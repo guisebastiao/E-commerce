@@ -10,5 +10,5 @@ import java.time.Instant;
 public class AuthResponseDTO {
     private String token;
     private Instant expires;
-    private UserDTO user;
+    private UserResponseDTO user;
 }

@@ -10,6 +10,7 @@ import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.AssessmentRepository;
 import com.guisebastiao.api.repositories.ProductRepository;
 import com.guisebastiao.api.utils.UUIDConverter;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,9 @@ public class AssessmentService {
 
     @Autowired
     private AssessmentRepository assessmentRepository;
+
+    @Autowired
+    private MinioClient minioClient;
 
     public DefaultResponseDTO create(String productId, AssessmentDTO dto) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -69,7 +73,7 @@ public class AssessmentService {
         List<AssessmentResponseDTO> responseList = resultPage
                 .getContent()
                 .stream()
-                .map(e -> new AssessmentResponseDTO().toDto(e))
+                .map(e -> new AssessmentResponseDTO().toDto(e, minioClient))
                 .toList();
 
         DefaultResponseDTO response = new DefaultResponseDTO();

@@ -3,7 +3,6 @@ package com.guisebastiao.api.services;
 import com.guisebastiao.api.dtos.DefaultResponseDTO;
 import com.guisebastiao.api.dtos.ProductDTO;
 import com.guisebastiao.api.dtos.ProductResponseDTO;
-import com.guisebastiao.api.dtos.UserDTO;
 import com.guisebastiao.api.enums.Category;
 import com.guisebastiao.api.enums.ProductActive;
 import com.guisebastiao.api.enums.Role;
@@ -14,19 +13,20 @@ import com.guisebastiao.api.models.Product;
 import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.ProductRepository;
 import com.guisebastiao.api.utils.UUIDConverter;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private MinioClient minioClient;
 
     public DefaultResponseDTO create(ProductDTO dto) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -64,7 +64,7 @@ public class ProductService {
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Produto encontrado com sucesso");
-        response.setData(productResponseDTO.toDto(product));
+        response.setData(productResponseDTO.toDto(product, minioClient));
         response.setSuccess(Boolean.TRUE);
 
         return response;

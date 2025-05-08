@@ -1,12 +1,13 @@
 package com.guisebastiao.api.services;
 
 import com.guisebastiao.api.dtos.DefaultResponseDTO;
-import com.guisebastiao.api.dtos.UserDTO;
+import com.guisebastiao.api.dtos.UserResponseDTO;
 import com.guisebastiao.api.dtos.UserUpdateDTO;
 import com.guisebastiao.api.exceptions.EntityNotFoundException;
 import com.guisebastiao.api.models.User;
 import com.guisebastiao.api.repositories.UserRepository;
 import com.guisebastiao.api.utils.UUIDConverter;
+import io.minio.MinioClient;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,16 +20,19 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private MinioClient minioClient;
+
     public DefaultResponseDTO getUserById(String id) {
         User user = this.userRepository.findById(UUIDConverter.toUUID(id))
                 .orElseThrow(() -> new EntityNotFoundException("Essa conta não foi encontrado"));
 
-        UserDTO userDTO = new UserDTO();
+        UserResponseDTO userDTO = new UserResponseDTO();
 
         DefaultResponseDTO response = new DefaultResponseDTO();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Conta encontrada com sucesso");
-        response.setData(userDTO.toDto(user));
+        response.setData(userDTO.toDto(user, minioClient));
         response.setSuccess(Boolean.TRUE);
 
         return response;

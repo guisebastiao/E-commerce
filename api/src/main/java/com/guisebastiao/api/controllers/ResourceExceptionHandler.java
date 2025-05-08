@@ -22,7 +22,6 @@ public class ResourceExceptionHandler {
     public ResponseEntity<DefaultResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         List<FieldError> fieldErrors = e.getFieldErrors();
 
-
         List<FieldErrorDTO> fieldErrorDTOs = fieldErrors.stream().map(err -> {
             FieldErrorDTO fieldError = new FieldErrorDTO();
             fieldError.setField(err.getField());
