@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ImageFileValidator implements ConstraintValidator<ImageFile, MultipartFile> {
-
     private final List<String> allowedTypes = Arrays.asList(
             "image/jpeg",
             "image/png",

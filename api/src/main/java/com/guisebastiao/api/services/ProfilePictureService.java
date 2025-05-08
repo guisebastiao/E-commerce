@@ -84,7 +84,12 @@ public class ProfilePictureService {
 
         var objectId = user.getProfilePicture().getObjectId();
 
-        String url = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket("ecommerce").object(objectId).expiry(604800).build());
+        String url = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                .method(Method.GET)
+                .bucket("ecommerce")
+                .object(objectId)
+                .expiry(604800)
+                .build());
 
         ProfilePictureDTO profilePictureDTO = new ProfilePictureDTO();
         profilePictureDTO.setProfilePictureUrl(url);
